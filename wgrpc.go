@@ -21,7 +21,6 @@ import (
 const Path = "/etc/wireguard/"
 const ListenOn = "localhost:9000"
 
-
 var LocalStartFrom = net.IP{172, 22, 1, 1}
 
 type Response struct {
@@ -194,7 +193,7 @@ func (w *Wg) reserveIPNet() error {
 			}
 		}
 		(*ip)[3] = 1
-		
+
 		return nil
 	}
 
@@ -217,12 +216,12 @@ func (w *Wg) reserveIPNet() error {
 			if temp.IPAddress.To4() == nil {
 				continue
 			}
-			
+
 			if unic(temp.IPAddress, addresses) {
 				addresses = append(addresses, *temp.Network)
 			}
 		} else {
-			
+
 			continue
 		}
 	}
@@ -491,7 +490,7 @@ func (w *Wg) New(id int, reply *Wg) error {
 }
 
 func (w *Wg) Update(wg *Wg, reply *Response) error {
-	
+
 	if _, err := os.Stat(Path + "wg" + strconv.Itoa(wg.Id) + ".conf"); err == nil {
 		cmd := exec.Command("wg-quick", "down", "wg"+strconv.Itoa(wg.Id))
 		cmd.Run()
@@ -587,6 +586,13 @@ func (w *Wg) setkeys(k Keypair) {
 
 func main() {
 
+	cmd := exec.Command("wg", "version")
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("WgRPC cannot run wg. Make sure that the package wireguatd-tools is installed and you have enough permissions to use it.")
+		return
+	}
+
 	wg := new(Wg)
 	rpc.Register(wg)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", ListenOn)
@@ -606,6 +612,7 @@ func main() {
 }
 
 func checkError(err error) {
+
 	if err != nil {
 		fmt.Println("Fatal error ", err.Error())
 		os.Exit(1)
