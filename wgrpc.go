@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"flag"
 	"io"
 	"net"
 	"net/rpc"
@@ -18,8 +19,9 @@ import (
 	"text/template"
 )
 
-const Path = "/etc/wireguard/"
-const ListenOn = "localhost:9000"
+var Path string
+
+var ListenOn string
 
 var LocalStartFrom = net.IP{172, 22, 1, 1}
 
@@ -585,6 +587,10 @@ func (w *Wg) setkeys(k Keypair) {
 }
 
 func main() {
+
+	flag.StringVar(&ListenOn, "socket", "localhost:9000", "Ip address and port where listen to requests")
+	flag.StringVar(&Path, "wg-config-path", "/etc/wireguard/", "Define where wireguard interfaces configuration files stored")
+	flag.Parse()
 
 	cmd := exec.Command("wg", "version")
 	err := cmd.Run()
